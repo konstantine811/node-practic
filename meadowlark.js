@@ -2,7 +2,7 @@
 * @Author: Admin
 * @Date:   2017-07-17 17:49:44
 * @Last Modified by:   Admin
-* @Last Modified time: 2017-07-17 18:50:13
+* @Last Modified time: 2017-07-17 20:05:18
 */
 
 'use strict';
@@ -11,16 +11,17 @@ var express = require('express');
 var app = express();
 var handlebars = require('express-handlebars')
 	.create({defaultLayout: 'main'});
-var fortunes = [
-	"Победи свои страхи, или они победят тебя.",
-	"Рекам нужны стоки.",
-	"Не бойся неведомого.",
-	"Тебя ждет приятный сюрприз.",
-	"Будь проще везде, где только можно."];
+var fortune = require('./lib/fortune.js');
 
 
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
+
+app.use(function(req, res, next) {
+	res.locals.showTests = app.get('env') !== 'production' &&
+	req.query.test === '1';
+	next();
+});
 
 app.use(express.static(__dirname + '/public'));
 
@@ -30,10 +31,7 @@ app.get('/', function(req, res) {
 	res.render('home');
 });
 app.get('/about', function(req, res) {
-	var randomFortune = 
-		fortunes[Math.floor(Math.random() * fortunes.length)];
-
-	res.render('about', { fortune: randomFortune });
+	res.render('about', { fortune: fortune.getFortune() });
 });
 
 app.use(function(req, res, next) {
